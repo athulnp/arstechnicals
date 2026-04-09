@@ -11,7 +11,7 @@
   const html = document.documentElement;
   const icon = btn.querySelector('.theme-icon');
 
-  const saved = localStorage.getItem('ars-theme') || 'dark';
+  const saved = localStorage.getItem('ars-theme') || 'light';
   html.setAttribute('data-theme', saved);
   icon.textContent = saved === 'dark' ? '☀' : '☾';
 
