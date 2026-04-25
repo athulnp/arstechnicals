@@ -121,22 +121,56 @@
 
   const successMsg = document.getElementById('formSuccess');
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const btn = form.querySelector('button[type="submit"]');
     btn.textContent = 'Sending…';
     btn.disabled = true;
 
-    // Simulate async send (replace with real API call if needed)
-    setTimeout(() => {
-      successMsg.classList.add('show');
+    // Get form data
+    const formData = new FormData(form);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const service = formData.get('service');
+    const message = formData.get('message');
+
+    // Prepare API payload with formatted email content (HTML)
+    const emailBody = `Hello,<br><br>You have received a new inquiry through your website contact form. Here are the details:<br><br><strong>Full Name:</strong> ${name}<br><strong>Email Address:</strong> ${email}<br><strong>Service Interest:</strong> ${service || 'Not specified'}<br><br><strong>Message:</strong><br>${message}<br><br>---<br><br>Please reach out to the customer at your earliest convenience to follow up on this inquiry.<br><br>Best regards,<br>Your Website Contact Form`;
+
+    const payload = {
+      to: ['info@arstechnicals.com'],
+      subject: 'New Inquiry from A R SPrime Technical website.',
+      body: emailBody
+    };
+
+    try {
+      // Use CORS proxy to bypass CORS restrictions
+      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://athulapp.azurewebsites.net/api/Email/send-email');
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        successMsg.classList.add('show');
+        form.reset();
+        setTimeout(() => successMsg.classList.remove('show'), 5000);
+      } else {
+        console.error('Failed to send email:', response.statusText);
+        alert('Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
       btn.textContent = 'Send Inquiry';
       btn.disabled = false;
-      form.reset();
-
-      setTimeout(() => successMsg.classList.remove('show'), 5000);
-    }, 1200);
+    }
   });
 })();
 
